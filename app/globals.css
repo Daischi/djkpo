@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -79,8 +79,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Orbitron', 'Geist', 'Geist Mono Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: "Orbitron", "Geist", "Geist Mono Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-neon-green: var(--neon-green);
   --color-neon-glow: var(--neon-glow);
   --color-background: var(--background);
@@ -152,7 +152,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) translateX(0);
     opacity: 0.3;
   }
@@ -188,7 +189,8 @@
 }
 
 @keyframes glitch {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0);
   }
   20% {
@@ -210,7 +212,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(0, 255, 100, 0.3);
   }
   50% {
@@ -223,14 +226,23 @@
 }
 
 @keyframes neon-flicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-    text-shadow: 
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    text-shadow:
       0 0 5px rgba(0, 255, 100, 0.8),
       0 0 10px rgba(0, 255, 100, 0.6),
       0 0 20px rgba(0, 255, 100, 0.4),
       0 0 40px rgba(0, 255, 100, 0.2);
   }
-  20%, 24%, 55% {
+  20%,
+  24%,
+  55% {
     text-shadow: none;
   }
 }

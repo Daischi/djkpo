@@ -9,20 +9,20 @@ const nextConfig = {
   headers: async () => {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'Viewport-Width',
-            value: 'device-width',
+            key: "Viewport-Width",
+            value: "device-width",
           },
           {
-            key: 'X-UA-Compatible',
-            value: 'IE=edge',
+            key: "X-UA-Compatible",
+            value: "IE=edge",
           },
         ],
       },
-    ]
+    ];
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;
