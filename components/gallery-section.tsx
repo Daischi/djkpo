@@ -196,8 +196,8 @@ export function GallerySection() {
       className="relative py-24 md:py-32 bg-card/30"
     >
       {/* Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 md:w-96 md:h-96 lg:w-[600px] lg:h-[600px] bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-40 h-40 md:w-64 md:h-64 lg:w-[400px] lg:h-[400px] bg-primary/5 rounded-full blur-3xl" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
