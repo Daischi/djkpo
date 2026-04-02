@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import nodemailer from "nodemailer";
+import { jsPDF } from "jspdf";
 
 // Contract data interface
 interface ContractData {
@@ -32,6 +33,456 @@ const setupEmailTransport = () => {
   });
 };
 
+// Gerar PDF do contrato (idêntico ao contract-preview.tsx)
+function generateContractPDF(contractData: ContractData): Buffer {
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4",
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 15;
+  const contentWidth = pageWidth - margin * 2;
+  const bottomMargin = 30; // Espaço reservado no final da página
+  let yPos = margin;
+
+  // Font configuration
+  doc.setFont("Times", "normal");
+
+  // Helper function for text wrapping
+  const addWrappedText = (
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    fontSize: number = 11,
+  ) => {
+    doc.setFontSize(fontSize);
+    const lines = doc.splitTextToSize(text, maxWidth);
+    lines.forEach((line: string, index: number) => {
+      doc.text(line, x, y + index * 5);
+    });
+    return y + lines.length * 5;
+  };
+
+  // Helper to check if needs new page
+  const checkNewPage = (spaceNeeded: number = 20) => {
+    if (yPos + spaceNeeded > pageHeight - bottomMargin) {
+      doc.addPage();
+      yPos = margin;
+    }
+  };
+
+  // HEADER
+  yPos += 5;
+  doc.setFontSize(18);
+  doc.setFont("Times", "bold");
+  doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", pageWidth / 2, yPos, {
+    align: "center",
+  });
+  yPos += 8;
+
+  doc.setFontSize(12);
+  doc.setFont("Times", "normal");
+  doc.text("DISCOTECAGEM E ILUMINAÇÃO", pageWidth / 2, yPos, {
+    align: "center",
+  });
+  yPos += 8;
+
+  // Border line
+  doc.setDrawColor(100, 100, 100);
+  doc.line(margin, yPos, pageWidth - margin, yPos);
+  yPos += 6;
+
+  // Introduction
+  doc.setFontSize(10);
+  doc.setFont("Times", "normal");
+  yPos = addWrappedText(
+    "Pelo presente instrumento particular, as partes abaixo identificadas:",
+    margin,
+    yPos,
+    contentWidth,
+    10,
+  );
+  yPos += 5;
+
+  // CONTRATANTE
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CONTRATANTE:", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.text(`Nome: ${contractData.nomeCompleto}`, margin + 3, yPos);
+  yPos += 5;
+  doc.text(`CPF: ${contractData.cpf}`, margin + 3, yPos);
+  yPos += 5;
+  doc.text(`Email: ${contractData.email}`, margin + 3, yPos);
+  yPos += 8;
+
+  // CONTRATADO
+  doc.setFont("Times", "bold");
+  doc.text("CONTRATADO (DEEJAY):", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.text("Nome: Leonardo Capovilla", margin + 3, yPos);
+  yPos += 5;
+  doc.text("Nome artístico: DJ-Kp0", margin + 3, yPos);
+  yPos += 8;
+
+  // Transition
+  doc.setFont("Times", "normal");
+  doc.setFontSize(10);
+  doc.text("Têm entre si justo e contratado o que segue:", margin, yPos);
+  yPos += 7;
+
+  // CLAUSE 1
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.text("CLÁUSULA 1 - DO OBJETO", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  yPos = addWrappedText(
+    "1.1. O presente contrato tem como objeto a prestação de serviços de discotecagem (Deejay) pelo CONTRATADO no evento descrito a seguir:",
+    margin,
+    yPos,
+    contentWidth,
+    9,
+  );
+  yPos += 3;
+
+  const eventDetails = [
+    `Nome do evento: ${contractData.nomeEvento}`,
+    `Tipo do evento: ${contractData.tipoEvento}`,
+    `Local: ${contractData.localEvento}`,
+    `Data: ${formatDateShort(contractData.dataEvento)}`,
+    `Horário de início: ${contractData.horarioInicio} | Horário de término: ${contractData.horarioTermino}`,
+  ];
+
+  eventDetails.forEach((detail) => {
+    checkNewPage(8);
+    doc.setFont("Times", "normal");
+    doc.setFontSize(9);
+    doc.text("•  " + detail, margin + 5, yPos);
+    yPos += 5;
+  });
+  yPos += 3;
+
+  // CLAUSE 2
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 2 - DAS OBRIGAÇÕES DO CONTRATADO", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  doc.text("2.1. O CONTRATADO compromete-se a:", margin, yPos);
+  yPos += 4;
+
+  const clause2Items = [
+    "Comparecer ao local do evento na data acordada com antecedência mínima de 40 minutos;",
+    "Executar seleção musical adequada ao tipo do evento, podendo incluir pedidos do CONTRATANTE;",
+    "Levar seus equipamentos quando solicitado, ou utilizar estrutura fornecida pelo CONTRATANTE conforme prévio e expresso acordo;",
+    "Manter postura profissional durante toda a execução do serviço.",
+  ];
+
+  clause2Items.forEach((item, index) => {
+    checkNewPage(10);
+    const letter = String.fromCharCode(97 + index); // a, b, c, d
+    yPos = addWrappedText(
+      `${letter}) ${item}`,
+      margin + 5,
+      yPos,
+      contentWidth - 5,
+      9,
+    );
+    yPos += 1;
+  });
+  yPos += 3;
+
+  // CLAUSE 3
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 3 - DAS OBRIGAÇÕES DO CONTRATANTE", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  doc.text("3.1. O CONTRATANTE deverá:", margin, yPos);
+  yPos += 4;
+
+  const clause3Items = [
+    "Garantir acesso ao local junto ao espaço onde será realizado o evento para montagem e desmontagem do equipamento;",
+    "Disponibilizar ponto de energia adequado e seguro;",
+    "Garantir condições de segurança física ao CONTRATADO e seus equipamentos;",
+    "Efetuar o pagamento nas condições e prazos acordadas;",
+    "Se responsabilizar por qualquer dano causado por terceiros aos equipamentos do CONTRATADO.",
+  ];
+
+  clause3Items.forEach((item, index) => {
+    checkNewPage(10);
+    const letter = String.fromCharCode(97 + index); // a, b, c, d, e
+    yPos = addWrappedText(
+      `${letter}) ${item}`,
+      margin + 5,
+      yPos,
+      contentWidth - 5,
+      9,
+    );
+    yPos += 1;
+  });
+  yPos += 3;
+
+  // CLAUSE 4
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 4 - DO VALOR E FORMA DE PAGAMENTO", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  yPos = addWrappedText(
+    "4.1. Pelo serviço prestado, o CONTRATANTE pagará ao CONTRATADO o valor total de R$ 4.000,00 (Quatro mil reais) que será efetuado de maneira antecipada e integralmente até a data do evento, via PIX.",
+    margin,
+    yPos,
+    contentWidth,
+    9,
+  );
+  yPos += 5;
+
+  // CLAUSE 5
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 5 - DO CANCELAMENTO", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  doc.text(
+    "5.1. Em caso de cancelamento por parte do CONTRATANTE:",
+    margin,
+    yPos,
+  );
+  yPos += 4;
+
+  yPos = addWrappedText(
+    "• Menos de 7 dias do evento: não há devolução do valor pago;",
+    margin + 5,
+    yPos,
+    contentWidth - 5,
+    9,
+  );
+  yPos += 1;
+  yPos = addWrappedText(
+    "• Em caso de força maior comprovada, as partes poderão remarcar a data sem multa.",
+    margin + 5,
+    yPos,
+    contentWidth - 5,
+    9,
+  );
+  yPos += 3;
+
+  yPos = addWrappedText(
+    "5.2. Em caso de cancelamento pelo CONTRATADO, todos os valores pagos deverão ser devolvidos integralmente.",
+    margin,
+    yPos,
+    contentWidth,
+    9,
+  );
+  yPos += 5;
+
+  // CLAUSE 6
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 6 - DO USO DE IMAGEM", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  yPos = addWrappedText(
+    "6.1. O CONTRATADO está autorizado a registrar fotos e vídeos de sua apresentação para uso profissional e divulgação, salvo se o CONTRATANTE manifestar proibição por escrito.",
+    margin,
+    yPos,
+    contentWidth,
+    9,
+  );
+  yPos += 5;
+
+  // CLAUSE 7
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 7 - DO FORO", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  yPos = addWrappedText(
+    "7.1. Para dirimir quaisquer dúvidas oriundas deste contrato, as partes elegem o foro da comarca da capital do estado de São Paulo.",
+    margin,
+    yPos,
+    contentWidth,
+    9,
+  );
+  yPos += 7;
+
+  // Closing text
+  checkNewPage(35); // Reservar espaço para fechamento e assinaturas
+  doc.setFont("Times", "normal");
+  doc.setFontSize(10);
+  yPos = addWrappedText(
+    "E, por estarem de pleno acordo, as partes assinam o presente contrato digitalmente.",
+    margin,
+    yPos,
+    contentWidth,
+    10,
+  );
+  yPos += 8;
+
+  // Date
+  const today = new Date();
+  const dateExtended = formatDateExtended(today);
+  doc.text(`São Paulo, ${dateExtended}`, margin, yPos);
+  yPos += 15;
+
+  // Signatures section
+  const signatureBoxHeight = 25;
+  const signatureY = yPos;
+
+  // Left signature (CONTRATANTE)
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+
+  // Signature line
+  doc.setDrawColor(0, 0, 0);
+  doc.line(
+    margin,
+    signatureY + signatureBoxHeight,
+    margin + contentWidth / 2 - 5,
+    signatureY + signatureBoxHeight,
+  );
+
+  // Add signature image if exists
+  try {
+    if (contractData.signature && contractData.signature.length > 0) {
+      doc.addImage(
+        contractData.signature,
+        "PNG",
+        margin + 10,
+        signatureY,
+        40,
+        15,
+      );
+    }
+  } catch (error) {
+    console.warn("Erro ao adicionar assinatura:", error);
+  }
+
+  // Labels
+  doc.setFont("Times", "bold");
+  doc.setFontSize(9);
+  doc.text(
+    "CONTRATANTE",
+    margin + contentWidth / 4 - 8,
+    signatureY + signatureBoxHeight + 6,
+    { align: "center" },
+  );
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(8);
+  const contractantName = contractData.nomeCompleto || "Nome do Contratante";
+  doc.text(
+    contractantName,
+    margin + contentWidth / 4 - 8,
+    signatureY + signatureBoxHeight + 11,
+    { align: "center" },
+  );
+
+  // Right signature (CONTRATADO - DJ)
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+
+  // Signature line
+  doc.line(
+    margin + contentWidth / 2 + 5,
+    signatureY + signatureBoxHeight,
+    pageWidth - margin,
+    signatureY + signatureBoxHeight,
+  );
+
+  // DJ stamp/initial
+  doc.setFont("Times", "italic");
+  doc.setTextColor(150, 150, 150);
+  doc.setFontSize(20);
+  doc.text(
+    "DJ KPO",
+    margin + contentWidth / 2 + contentWidth / 4 - 8,
+    signatureY + 8,
+    { align: "center" },
+  );
+  doc.setTextColor(0, 0, 0);
+
+  // Labels
+  doc.setFont("Times", "bold");
+  doc.setFontSize(9);
+  doc.text(
+    "CONTRATADO",
+    margin + contentWidth / 2 + contentWidth / 4 - 8,
+    signatureY + signatureBoxHeight + 6,
+    { align: "center" },
+  );
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(8);
+  doc.text(
+    "Leonardo Capovilla - DJ-Kp0",
+    margin + contentWidth / 2 + contentWidth / 4 - 8,
+    signatureY + signatureBoxHeight + 11,
+    { align: "center" },
+  );
+
+  return Buffer.from(doc.output("arraybuffer"));
+}
+
+// Helper functions for date formatting
+function formatDateShort(dateString: string): string {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+function formatDateExtended(date: Date): string {
+  const months = [
+    "janeiro",
+    "fevereiro",
+    "março",
+    "abril",
+    "maio",
+    "junho",
+    "julho",
+    "agosto",
+    "setembro",
+    "outubro",
+    "novembro",
+    "dezembro",
+  ];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day} de ${month} de ${year}`;
+}
+
 // Adicionar data ao arquivo de datas ocupadas
 function addOccupiedDate(date: string) {
   try {
@@ -52,8 +503,11 @@ function addOccupiedDate(date: string) {
   }
 }
 
-// Enviar email com a assinatura
-async function sendContractEmail(contractData: ContractData) {
+// Enviar emails (cliente e DJ)
+async function sendContractEmails(
+  contractData: ContractData,
+  pdfBuffer: Buffer,
+) {
   try {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       console.warn("Email não configurado. Pulando envio de email.");
@@ -62,30 +516,98 @@ async function sendContractEmail(contractData: ContractData) {
 
     const transporter = setupEmailTransport();
 
-    // Email para o DJ
+    const eventDate = new Date(contractData.dataEvento);
+    const formattedDate = eventDate.toLocaleDateString("pt-BR");
+
+    // Email para o CLIENTE - Confirmação de recebimento
+    const clientMailOptions = {
+      from: process.env.EMAIL_USER,
+      to: contractData.email,
+      subject: `Contrato Recebido - ${contractData.nomeEvento}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #0064c8;">Seu Contrato foi Recebido!</h2>
+          <p>Olá <strong>${contractData.nomeCompleto}</strong>,</p>
+          <p>Recebemos com sucesso seu contrato para o evento:</p>
+
+          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+            <p><strong>Evento:</strong> ${contractData.nomeEvento}</p>
+            <p><strong>Data:</strong> ${formattedDate}</p>
+            <p><strong>Horário:</strong> ${contractData.horarioInicio} - ${contractData.horarioTermino}</p>
+            <p><strong>Local:</strong> ${contractData.localEvento}</p>
+          </div>
+
+          <p>Em anexo você encontra uma cópia do seu contrato assinado.</p>
+          <p>Em breve você receberá confirmação final da contratação.</p>
+
+          <hr style="margin: 20px 0;">
+          <p style="color: #666; font-size: 12px;">
+            Esta é uma mensagem automática. Por favor, não responda este email.
+          </p>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `Contrato_${contractData.nomeEvento.replace(/\s+/g, "_")}.pdf`,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    };
+
+    // Email para o DJ - Novo contrato com PDF
     const djMailOptions = {
       from: process.env.EMAIL_USER,
       to: "guilhermepoppilm@gmail.com",
-      subject: `Novo Contrato Recebido - ${contractData.nomeEvento}`,
+      subject: `[NOVO CONTRATO] ${contractData.nomeEvento} - ${contractData.nomeCompleto}`,
       html: `
-        <h2>Novo Contrato Recebido</h2>
-        <p><strong>Cliente:</strong> ${contractData.nomeCompleto}</p>
-        <p><strong>Email:</strong> ${contractData.email}</p>
-        <p><strong>Evento:</strong> ${contractData.nomeEvento}</p>
-        <p><strong>Tipo:</strong> ${contractData.tipoEvento}</p>
-        <p><strong>Local:</strong> ${contractData.localEvento}</p>
-        <p><strong>Data:</strong> ${new Date(contractData.dataEvento).toLocaleDateString("pt-BR")}</p>
-        <p><strong>Horário:</strong> ${contractData.horarioInicio} - ${contractData.horarioTermino}</p>
-        <hr>
-        <h3>Assinatura do Cliente:</h3>
-        <img src="${contractData.signature}" alt="Assinatura" style="max-width: 300px; border: 1px solid #ccc; padding: 10px;">
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #0064c8;">🎵 Novo Contrato Recebido!</h2>
+
+          <div style="background-color: #e8f4f8; padding: 15px; border-radius: 5px; border-left: 4px solid #0064c8; margin: 15px 0;">
+            <h3 style="margin-top: 0; color: #0064c8;">Detalhes da Solicitação</h3>
+
+            <p><strong>👤 Cliente:</strong> ${contractData.nomeCompleto}</p>
+            <p><strong>📧 Email:</strong> ${contractData.email}</p>
+            <p><strong>📱 CPF:</strong> ${contractData.cpf}</p>
+
+            <hr style="margin: 15px 0; border: none; border-top: 1px solid #999;">
+
+            <p><strong>🎉 Evento:</strong> ${contractData.nomeEvento}</p>
+            <p><strong>🎭 Tipo:</strong> ${contractData.tipoEvento}</p>
+            <p><strong>📍 Local:</strong> ${contractData.localEvento}</p>
+            <p><strong>📅 Data:</strong> ${formattedDate}</p>
+            <p><strong>⏰ Horário:</strong> ${contractData.horarioInicio} - ${contractData.horarioTermino}</p>
+          </div>
+
+          <p style="background-color: #fff3cd; padding: 10px; border-radius: 5px; border-left: 4px solid #ffc107;">
+            <strong>✅ O contrato assinado está em anexo!</strong>
+          </p>
+
+          <hr style="margin: 20px 0;">
+          <p style="color: #666; font-size: 12px;">
+            Sistema de Gerenciamento de Contratos - DJ KPO
+          </p>
+        </div>
       `,
+      attachments: [
+        {
+          filename: `Contrato_${contractData.nomeEvento.replace(/\s+/g, "_")}.pdf`,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
     };
 
+    // Enviar ambos os emails
+    await transporter.sendMail(clientMailOptions);
+    console.log("✅ Email enviado para o cliente com sucesso");
+
     await transporter.sendMail(djMailOptions);
-    console.log("Email enviado para o DJ com sucesso");
+    console.log("✅ Email enviado para o DJ com sucesso");
   } catch (error) {
-    console.error("Erro ao enviar email:", error);
+    console.error("❌ Erro ao enviar emails:", error);
+    throw error;
   }
 }
 
@@ -151,11 +673,18 @@ export async function POST(request: Request) {
     console.log("Assinatura recebida:", data.signature ? "Sim" : "Não");
     console.log("==============================");
 
+    // Gerar PDF do contrato
+    console.log("📄 Gerando PDF do contrato...");
+    const pdfBuffer = generateContractPDF(data);
+    console.log("✅ PDF gerado com sucesso");
+
+    // Enviar emails para cliente e DJ com PDF attachado
+    console.log("📧 Enviando emails...");
+    await sendContractEmails(data, pdfBuffer);
+    console.log("✅ Emails enviados com sucesso");
+
     // Adicionar data ao arquivo de datas ocupadas
     addOccupiedDate(dateString);
-
-    // Enviar email para o DJ
-    await sendContractEmail(data);
 
     return NextResponse.json({
       success: true,
