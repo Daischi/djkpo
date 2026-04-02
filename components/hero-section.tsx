@@ -5,13 +5,34 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, Play, Instagram, Youtube, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+interface Particle {
+  left: string;
+  top: string;
+  animationDelay: string;
+  animationDuration: string;
+  opacity: number;
+}
+
 export function HeroSection() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [glitchText, setGlitchText] = useState("KPO");
   const [glitchActive, setGlitchActive] = useState(false);
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
+    // Gerar partículas apenas no client para evitar hydration mismatch
+    const generatedParticles: Particle[] = [];
+    for (let i = 0; i < 30; i++) {
+      generatedParticles.push({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${Math.random() * 5}s`,
+        animationDuration: `${3 + Math.random() * 4}s`,
+        opacity: Math.random() * 0.7 + 0.3,
+      });
+    }
+    setParticles(generatedParticles);
     setIsVisible(true);
 
     const glitchChars = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
@@ -40,10 +61,6 @@ export function HeroSection() {
 
     return () => clearInterval(interval);
   }, []);
-
-  const scrollToAbout = () => {
-    document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -92,16 +109,16 @@ export function HeroSection() {
 
       {/* Floating particles */}
       <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
-        {[...Array(30)].map((_, i) => (
+        {particles.map((particle, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-primary rounded-full animate-float"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${3 + Math.random() * 4}s`,
-              opacity: Math.random() * 0.7 + 0.3,
+              left: particle.left,
+              top: particle.top,
+              animationDelay: particle.animationDelay,
+              animationDuration: particle.animationDuration,
+              opacity: particle.opacity,
             }}
           />
         ))}
@@ -187,7 +204,11 @@ export function HeroSection() {
 
       {/* Scroll Indicator */}
       <button
-        onClick={scrollToAbout}
+        onClick={() =>
+          document
+            .getElementById("about")
+            ?.scrollIntoView({ behavior: "smooth" })
+        }
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-primary animate-bounce cursor-pointer"
         aria-label="Rolar para baixo"
       >
