@@ -55,23 +55,10 @@ export default function RootLayout({
         <meta charSet="UTF-8" />
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
+          content="width=device-width, initial-scale=0.8, viewport-fit=cover"
         />
         <meta name="format-detection" content="telephone=no" />
         <meta name="format-detection" content="email=no" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined') {
-                document.documentElement.style.zoom = '1';
-                document.documentElement.style.fontSize = '16px';
-                document.body.style.zoom = '1';
-                document.body.style.margin = '0';
-                document.body.style.padding = '0';
-              }
-            `,
-          }}
-        />
       </head>
       <body
         className={`${orbitron.variable} ${inter.variable} font-sans antialiased bg-background text-foreground`}

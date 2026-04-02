@@ -126,12 +126,10 @@
     @apply border-border outline-ring/50;
   }
   html {
-    zoom: 1;
     font-size: 16px;
   }
   body {
     @apply bg-background text-foreground;
-    zoom: 1;
     margin: 0;
     padding: 0;
   }
