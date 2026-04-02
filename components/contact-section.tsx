@@ -83,7 +83,7 @@ export function ContactSection() {
               </a>
 
               <a
-                href="https://wa.me/5511999999999"
+                href="https://wa.me/5511964438044"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 p-4 bg-card/50 border border-border/50 rounded-lg hover:border-primary/50 transition-all group"
@@ -94,7 +94,7 @@ export function ContactSection() {
                 <div>
                   <div className="text-sm text-muted-foreground">WhatsApp</div>
                   <div className="text-foreground font-medium">
-                    +55 (11) 99999-9999
+                    +55 (11) 96443-8044
                   </div>
                 </div>
               </a>
