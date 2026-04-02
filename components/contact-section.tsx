@@ -121,7 +121,7 @@ export function ContactSection() {
               </h4>
               <div className="flex gap-4">
                 <a
-                  href="https://instagram.com/djkpo.official"
+                  href="https://www.instagram.com/leocapovilla/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-lg bg-card border border-border/50 flex items-center justify-center hover:border-primary/50 hover:bg-primary/10 transition-all text-muted-foreground hover:text-primary"
@@ -129,7 +129,7 @@ export function ContactSection() {
                   <Instagram className="w-5 h-5" />
                 </a>
                 <a
-                  href="https://youtube.com/@djkpo"
+                  href="https://www.youtube.com/@DJ-KP0"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-lg bg-card border border-border/50 flex items-center justify-center hover:border-primary/50 hover:bg-primary/10 transition-all text-muted-foreground hover:text-primary"

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { Music, Instagram, Youtube, Music2, Heart } from "lucide-react"
+import { Music, Instagram, Youtube, Music2, Heart } from "lucide-react";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="relative bg-card/50 border-t border-border/50">
@@ -11,12 +11,12 @@ export function Footer() {
         <div className="grid md:grid-cols-3 gap-8 items-center">
           {/* Logo */}
           <div className="text-center md:text-left">
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="inline-flex items-center gap-2 text-2xl font-black tracking-wider"
               onClick={(e) => {
-                e.preventDefault()
-                window.scrollTo({ top: 0, behavior: 'smooth' })
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             >
               <Music className="w-7 h-7 text-primary" />
@@ -30,27 +30,27 @@ export function Footer() {
 
           {/* Social Links */}
           <div className="flex justify-center gap-4">
-            <a 
-              href="https://instagram.com/djkpo.official" 
-              target="_blank" 
+            <a
+              href="https://www.instagram.com/leocapovilla/"
+              target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-full border border-border/50 flex items-center justify-center hover:border-primary/50 hover:bg-primary/10 transition-all text-muted-foreground hover:text-primary"
               aria-label="Instagram"
             >
               <Instagram className="w-5 h-5" />
             </a>
-            <a 
-              href="https://youtube.com/@djkpo" 
-              target="_blank" 
+            <a
+              href="https://www.youtube.com/@DJ-KP0"
+              target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-full border border-border/50 flex items-center justify-center hover:border-primary/50 hover:bg-primary/10 transition-all text-muted-foreground hover:text-primary"
               aria-label="YouTube"
             >
               <Youtube className="w-5 h-5" />
             </a>
-            <a 
-              href="https://soundcloud.com/djkpo" 
-              target="_blank" 
+            <a
+              href="https://soundcloud.com/djkpo"
+              target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-full border border-border/50 flex items-center justify-center hover:border-primary/50 hover:bg-primary/10 transition-all text-muted-foreground hover:text-primary"
               aria-label="SoundCloud"
@@ -65,7 +65,8 @@ export function Footer() {
               © {currentYear} DJ KPO. Todos os direitos reservados.
             </p>
             <p className="text-muted-foreground/70 text-xs mt-1 flex items-center justify-center md:justify-end gap-1">
-              Feito com <Heart className="w-3 h-3 text-primary" /> para a cena techno
+              Feito com <Heart className="w-3 h-3 text-primary" /> para a cena
+              techno
             </p>
           </div>
         </div>
@@ -74,5 +75,5 @@ export function Footer() {
       {/* Bottom Glow */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
     </footer>
-  )
+  );
 }
