@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronDown, Play, Instagram, Youtube, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [glitchText, setGlitchText] = useState("KPO");
   const [glitchActive, setGlitchActive] = useState(false);
@@ -139,11 +141,7 @@ export function HeroSection() {
           <Button
             size="lg"
             className="group relative overflow-hidden bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 text-lg font-bold tracking-wider"
-            onClick={() =>
-              document
-                .getElementById("contact")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
+            onClick={() => router.push("/contrato")}
           >
             <span className="relative z-10 flex items-center gap-2">
               CONTRATAR AGORA

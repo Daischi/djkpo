@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const videos = [
   {
@@ -26,6 +27,7 @@ const videos = [
 ];
 
 export function VideosSection() {
+  const isMobile = useIsMobile();
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -45,6 +47,9 @@ export function VideosSection() {
 
     return () => observer.disconnect();
   }, []);
+
+  // Mostrar apenas 2 vídeos em mobile, 4 em desktop
+  const displayedVideos = isMobile ? videos.slice(0, 2) : videos;
 
   return (
     <section id="videos" ref={sectionRef} className="relative py-24 md:py-32">
@@ -73,7 +78,7 @@ export function VideosSection() {
 
         {/* Videos Grid */}
         <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-          {videos.map((video, index) => (
+          {displayedVideos.map((video, index) => (
             <div
               key={index}
               className={`group relative overflow-hidden rounded-xl bg-card transition-all duration-700 ${
