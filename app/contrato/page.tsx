@@ -50,21 +50,108 @@ export default function ContratoPage() {
           </p>
         </div>
 
-        {/* Value Info */}
-        <div className="bg-primary/10 border border-primary/30 rounded-xl p-6 mb-10 max-w-2xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-center md:text-left">
-              <p className="text-sm text-muted-foreground mb-1">
-                Valor do Serviço
-              </p>
-              <p className="text-3xl font-black text-primary">R$ 4.000,00</p>
-            </div>
-            <div className="text-center md:text-right">
-              <p className="text-sm text-muted-foreground mb-1">Agendamento</p>
-              <div className="flex justify-center md:justify-end">
-                {/* Calendário de agendamento */}
-                <div className="max-w-xs w-full">
-                  <CalendarClient />
+        {/* Agenda Section */}
+        <div className="mb-12 max-w-4xl mx-auto">
+          <div className="relative rounded-2xl overflow-hidden border border-primary/20">
+            {/* Glow de fundo */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+            <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative flex flex-col md:flex-row items-stretch">
+              {/* Foto DJ KPO */}
+              <div className="md:w-56 flex-shrink-0 relative overflow-hidden">
+                <img
+                  src="/dj-kpo-agenda.jpg"
+                  alt="DJ KPO"
+                  className="w-full h-full object-cover object-top"
+                  style={{ minHeight: "360px" }}
+                />
+                {/* Gradiente lateral para fundir com o calendário */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/80 hidden md:block" />
+                {/* Gradiente inferior no mobile */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 md:hidden" />
+              </div>
+
+              {/* Calendário */}
+              <div className="flex-1 pl-6 pr-8 py-8 flex flex-col justify-center bg-black/40 backdrop-blur-sm">
+                {/* Header */}
+                <div className="mb-6">
+                  <span className="inline-block text-xs font-mono text-primary uppercase tracking-[0.4em] mb-2 border border-primary/30 px-3 py-1 rounded-full bg-primary/5">
+                    Disponibilidade
+                  </span>
+                  <h3 className="text-2xl font-black text-foreground mt-3">
+                    Agenda do{" "}
+                    <span className="text-primary relative">
+                      DJ KPO
+                      <span className="absolute -inset-1 blur-md bg-primary/20 -z-10" />
+                    </span>
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Verifique a disponibilidade antes de prosseguir
+                  </p>
+                </div>
+
+                {/* Separador */}
+                <div className="h-px w-full bg-gradient-to-r from-primary/40 via-primary/20 to-transparent mb-6" />
+
+                <div className="flex flex-col lg:flex-row gap-6 items-start">
+                  {/* Calendário */}
+                  <div className="flex-shrink-0">
+                    <CalendarClient />
+                  </div>
+
+                  {/* Info lateral */}
+                  <div className="flex flex-col gap-3 w-full">
+                    {/* Gêneros */}
+                    <div className="bg-primary/5 border border-primary/15 rounded-xl p-4">
+                      <p className="text-xs font-mono text-primary uppercase tracking-widest mb-3">
+                        Estilos
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "Techno",
+                          "Industrial",
+                          "Underground",
+                          "Dark Techno",
+                        ].map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs font-mono px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-primary"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-primary/5 border border-primary/15 rounded-xl p-4 text-center">
+                        <p className="text-2xl font-black text-primary">+100</p>
+                        <p className="text-xs text-muted-foreground mt-1 font-mono uppercase tracking-wider">
+                          Events
+                        </p>
+                      </div>
+                      <div className="bg-primary/5 border border-primary/15 rounded-xl p-4 text-center">
+                        <p className="text-2xl font-black text-primary">+5h</p>
+                        <p className="text-xs text-muted-foreground mt-1 font-mono uppercase tracking-wider">
+                          Set médio
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="bg-primary/5 border border-primary/15 rounded-xl p-4">
+                      <p className="text-xs text-muted-foreground font-mono uppercase tracking-widest mb-1">
+                        Próximo passo
+                      </p>
+                      <p className="text-sm text-foreground font-medium">
+                        Escolha uma data disponível e preencha o formulário
+                        abaixo para formalizar a contratação.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

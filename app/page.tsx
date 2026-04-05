@@ -1,17 +1,19 @@
-import { Header } from "@/components/header"
-import { HeroSection } from "@/components/hero-section"
-import { AboutSection } from "@/components/about-section"
-import { GallerySection } from "@/components/gallery-section"
-import { VideosSection } from "@/components/videos-section"
-import { ServicesSection } from "@/components/services-section"
-import { ContactSection } from "@/components/contact-section"
-import { Footer } from "@/components/footer"
-import { AnimatedBackground } from "@/components/animated-background"
+import { Header } from "@/components/header";
+import { HeroSection } from "@/components/hero-section";
+import { AboutSection } from "@/components/about-section";
+import { GallerySection } from "@/components/gallery-section";
+import { VideosSection } from "@/components/videos-section";
+import { ServicesSection } from "@/components/services-section";
+import { ContactSection } from "@/components/contact-section";
+import { Footer } from "@/components/footer";
+import { AnimatedBackground } from "@/components/animated-background";
+import { AutoplayMusic } from "@/components/autoplay-music";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-background overflow-x-hidden relative">
       <AnimatedBackground />
+      <AutoplayMusic />
       <div className="relative z-10">
         <Header />
         <HeroSection />
@@ -23,5 +25,5 @@ export default function Home() {
         <Footer />
       </div>
     </main>
-  )
+  );
 }

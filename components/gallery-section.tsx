@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const galleryItems = [
   {
@@ -168,6 +175,196 @@ function VideoItem({
   );
 }
 
+const epicMoments = [
+  {
+    src: "/capo/WhatsApp Image 2026-03-19 at 16.15.39.jpeg",
+    alt: "Momento épico 1",
+  },
+  {
+    src: "/capo/WhatsApp Image 2026-03-19 at 16.18.29 (1).jpeg",
+    alt: "Momento épico 2",
+  },
+  {
+    src: "/capo/WhatsApp Image 2026-03-19 at 16.18.29.jpeg",
+    alt: "Momento épico 3",
+  },
+  {
+    src: "/capo/WhatsApp Image 2026-04-02 at 10.48.26.jpeg",
+    alt: "Momento épico 4",
+  },
+];
+
+function EpicCarousel({
+  isVisible,
+  index,
+}: {
+  isVisible: boolean;
+  index: number;
+}) {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % epicMoments.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const prev = () =>
+    setCurrent((c) => (c - 1 + epicMoments.length) % epicMoments.length);
+  const next = () => setCurrent((c) => (c + 1) % epicMoments.length);
+
+  return (
+    <div
+      className={`relative group overflow-hidden rounded-xl col-span-1 row-span-1 transition-all duration-700 ${
+        isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      }`}
+      style={{ transitionDelay: `${index * 150}ms` }}
+    >
+      {epicMoments.map((img, i) => (
+        <img
+          key={i}
+          src={img.src}
+          alt={img.alt}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            i === current ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      ))}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+      <button
+        onClick={prev}
+        className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/60"
+      >
+        <ChevronLeft className="w-4 h-4 text-white" />
+      </button>
+      <button
+        onClick={next}
+        className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/60"
+      >
+        <ChevronRight className="w-4 h-4 text-white" />
+      </button>
+
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+        {epicMoments.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === current ? "bg-primary w-4" : "bg-white/50 w-1.5"
+            }`}
+          />
+        ))}
+      </div>
+
+      <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/50 transition-colors duration-300 rounded-xl" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+        <div className="absolute inset-0 rounded-xl shadow-[0_0_40px_rgba(0,255,100,0.4),inset_0_0_20px_rgba(0,255,100,0.1)]" />
+      </div>
+    </div>
+  );
+}
+
+function EpicVideoSmall({
+  isVisible,
+  index,
+}: {
+  isVisible: boolean;
+  index: number;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && videoRef.current) {
+          videoRef.current.play();
+          setIsPlaying(true);
+        } else if (!entry.isIntersecting && videoRef.current) {
+          videoRef.current.pause();
+          setIsPlaying(false);
+        }
+      },
+      { threshold: 0.5 },
+    );
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) videoRef.current.pause();
+      else videoRef.current.play();
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative group overflow-hidden rounded-xl col-span-1 row-span-1 cursor-pointer transition-all duration-700 ${
+        isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      }`}
+      style={{ transitionDelay: `${index * 150}ms` }}
+      onClick={togglePlay}
+    >
+      <video
+        ref={videoRef}
+        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WhatsApp%20Video%202026-03-19%20at%2016.18.19-K4DjMxvuuU4ABQzZPa7SMkapYJwZif.mp4"
+        muted={isMuted}
+        loop
+        playsInline
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+      />
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className={`w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center transition-all duration-300 ${
+            isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+          } group-hover:scale-110`}
+        >
+          {isPlaying ? (
+            <Pause className="w-5 h-5 text-primary-foreground" />
+          ) : (
+            <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
+          )}
+        </div>
+      </div>
+
+      <button
+        onClick={toggleMute}
+        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/50"
+      >
+        {isMuted ? (
+          <VolumeX className="w-3.5 h-3.5 text-foreground" />
+        ) : (
+          <Volume2 className="w-3.5 h-3.5 text-foreground" />
+        )}
+      </button>
+
+      <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/50 transition-colors duration-300 rounded-xl" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+        <div className="absolute inset-0 rounded-xl shadow-[0_0_40px_rgba(0,255,100,0.4),inset_0_0_20px_rgba(0,255,100,0.1)]" />
+      </div>
+    </div>
+  );
+}
+
 export function GallerySection() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -220,34 +417,31 @@ export function GallerySection() {
           </p>
         </div>
 
-        {/* Gallery Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[310px]">
-          {galleryItems.map((item, index) =>
-            item.type === "video" ? (
-              <VideoItem
-                key={index}
-                item={item}
-                isVisible={isVisible}
-                index={index}
-              />
-            ) : (
+        {/* Gallery Grid — 5 colunas: [carousel][video-small][main-video (2)][dj-mixer][underground][dj-hands] */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 auto-rows-[200px] md:auto-rows-[310px]">
+          {/* Col 1 Linha 1 — Pequeno vídeo */}
+          <EpicVideoSmall isVisible={isVisible} index={0} />
+
+          {/* Col 2-3 Linhas 1-2 — Vídeo principal (col-span-2 row-span-2) */}
+          <VideoItem item={galleryItems[0]} isVisible={isVisible} index={1} />
+
+          {/* Col 4 Linhas 1-2 — Imagem mixer (col-span-1 row-span-2) */}
+          {(() => {
+            const item = galleryItems[1];
+            return (
               <div
-                key={index}
+                key={1}
                 className={`relative group overflow-hidden rounded-xl cursor-pointer ${item.span} transition-all duration-700 ${
                   isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
                 }`}
-                style={{ transitionDelay: `${index * 150}ms` }}
+                style={{ transitionDelay: `${2 * 150}ms` }}
               >
                 <img
                   src={item.src}
                   alt={item.alt}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
                 />
-
-                {/* Overlay with enhanced gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-
-                {/* Content */}
                 <div className="absolute inset-0 flex items-end p-6">
                   <div className="transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <span className="text-xs font-mono text-primary uppercase tracking-wider">
@@ -264,17 +458,60 @@ export function GallerySection() {
                     <div className="h-1 w-12 bg-gradient-to-r from-primary to-primary/50 mt-2" />
                   </div>
                 </div>
-
-                {/* Border Glow */}
                 <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/50 transition-colors duration-300 rounded-xl" />
-
-                {/* Enhanced Neon glow effect */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                   <div className="absolute inset-0 rounded-xl shadow-[0_0_40px_rgba(0,255,100,0.4),inset_0_0_20px_rgba(0,255,100,0.1)]" />
                 </div>
               </div>
-            ),
-          )}
+            );
+          })()}
+
+          {/* Col 5 Linha 1 — Vídeo underground */}
+          <VideoItem item={galleryItems[2]} isVisible={isVisible} index={3} />
+
+          {/* Col 1 Linha 2 — Carrossel de imagens */}
+          <EpicCarousel isVisible={isVisible} index={4} />
+
+          {/* Col 5 Linha 2 — Imagem dj-hands */}
+          {(() => {
+            const item = galleryItems[3];
+            return (
+              <div
+                key={3}
+                className={`relative group overflow-hidden rounded-xl cursor-pointer ${item.span} transition-all duration-700 ${
+                  isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                }`}
+                style={{ transitionDelay: `${5 * 150}ms` }}
+              >
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+                <div className="absolute inset-0 flex items-end p-6">
+                  <div className="transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <span className="text-xs font-mono text-primary uppercase tracking-wider">
+                      Performance
+                    </span>
+                    <h3 className="text-lg font-bold text-foreground mt-1">
+                      {item.title}
+                    </h3>
+                    {item.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {item.description}
+                      </p>
+                    )}
+                    <div className="h-1 w-12 bg-gradient-to-r from-primary to-primary/50 mt-2" />
+                  </div>
+                </div>
+                <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/50 transition-colors duration-300 rounded-xl" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                  <div className="absolute inset-0 rounded-xl shadow-[0_0_40px_rgba(0,255,100,0.4),inset_0_0_20px_rgba(0,255,100,0.1)]" />
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </section>

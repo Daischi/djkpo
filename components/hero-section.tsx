@@ -36,15 +36,15 @@ export function HeroSection() {
     setIsVisible(true);
 
     const glitchChars = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
-    const originalText = "KPO";
+    const originalText = "KP0";
 
     const interval = setInterval(() => {
-      const shouldGlitch = Math.random() > 0.5;
+      const shouldGlitch = Math.random() > 0.4;
       if (shouldGlitch) {
         setGlitchActive(true);
         let glitched = "";
         for (let i = 0; i < originalText.length; i++) {
-          if (Math.random() > 0.5) {
+          if (Math.random() > 0.35) {
             glitched +=
               glitchChars[Math.floor(Math.random() * glitchChars.length)];
           } else {
@@ -55,9 +55,9 @@ export function HeroSection() {
         setTimeout(() => {
           setGlitchText(originalText);
           setGlitchActive(false);
-        }, 150);
+        }, 80);
       }
-    }, 1500);
+    }, 800);
 
     return () => clearInterval(interval);
   }, []);
@@ -137,15 +137,37 @@ export function HeroSection() {
         <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-6 relative">
           <span className="font-[var(--font-orbitron)] tracking-wider text-foreground relative inline-block">
             DJ{" "}
-            <span className="text-primary relative">
-              {glitchText}
+            <span className="text-primary relative inline-block">
+              <span className="relative inline-block">{glitchText[0]}</span>
+              <span className="relative inline-block">{glitchText[1]}</span>
+              <span className="relative inline-block group">
+                {glitchText[2]}
+                {glitchText[2] === "0" && (
+                  <svg
+                    className="absolute inset-0 w-full h-full pointer-events-none"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    <line
+                      x1="10"
+                      y1="10"
+                      x2="90"
+                      y2="90"
+                      stroke="currentColor"
+                      strokeWidth="6"
+                      opacity="1"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+              </span>
               <span className="absolute -inset-1 blur-xl bg-primary/30 -z-10" />
             </span>
           </span>
         </h1>
 
         <p className="text-xl md:text-2xl text-muted-foreground mb-2 tracking-widest font-light">
-          TECHNO / INDUSTRIAL / UNDERGROUND
+          OPEN FORMAT
         </p>
 
         <div className="flex items-center justify-center gap-2 text-primary mb-8">

@@ -57,22 +57,12 @@ export function AboutSection() {
           <div
             className={`relative transition-all duration-1000 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-20"}`}
           >
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
+            <div className="relative overflow-hidden rounded-lg group">
               <img
                 src="/Capo sobre o Artista.jpeg"
                 alt="DJ KPO - Frequency Control"
-                className="w-full h-full object-cover"
+                className="w-full h-auto object-contain"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
-
-              {/* Glowing Border */}
-              <div className="absolute inset-0 border border-primary/30 rounded-lg" />
-              <div className="absolute -inset-1 bg-primary/10 blur-xl -z-10" />
-            </div>
-
-            {/* Floating Badge */}
-            <div className="absolute -bottom-6 -right-6 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-bold tracking-wider shadow-lg shadow-primary/30">
-              TECHNO 2026
             </div>
           </div>
 

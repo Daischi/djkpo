@@ -30,7 +30,7 @@ export default function CalendarClient() {
   }
 
   return (
-    <div className="max-w-xs mx-auto">
+    <div className="max-w-xs">
       <Calendar
         mode="single"
         disabled={occupiedDates}
