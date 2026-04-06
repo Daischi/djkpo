@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html {
+  font-size: 95%;
+}
+
 :root {
   --background: oklch(0.05 0 0);
   --foreground: oklch(0.98 0 0);
