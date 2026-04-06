@@ -3,6 +3,10 @@ import fs from "fs";
 import path from "path";
 import nodemailer from "nodemailer";
 import { jsPDF } from "jspdf";
+import { Redis } from "@upstash/redis";
+
+// Aumentar timeout para 60s no Vercel (necessário para gerar PDF + enviar emails)
+export const maxDuration = 60;
 
 // Contract data interface
 interface ContractData {
@@ -131,6 +135,12 @@ function generateContractPDF(contractData: ContractData): Buffer {
   doc.text("Nome: Leonardo Capovilla", margin + 3, yPos);
   yPos += 5;
   doc.text("Nome artístico: DJ-Kp0", margin + 3, yPos);
+  yPos += 5;
+  doc.text("CPF: 215.714.098-07", margin + 3, yPos);
+  yPos += 5;
+  doc.text("Endereço: Rua Juaguaré, 216", margin + 3, yPos);
+  yPos += 5;
+  doc.text("Chave PIX: lojaaloehas@gmail.com", margin + 3, yPos);
   yPos += 8;
 
   // Transition
@@ -303,13 +313,21 @@ function generateContractPDF(contractData: ContractData): Buffer {
   checkNewPage(15);
   doc.setFont("Times", "bold");
   doc.setFontSize(10);
-  doc.text("CLÁUSULA 6 - DO USO DE IMAGEM", margin, yPos);
+  doc.text("CLÁUSULA 6 - DAS CONDIÇÕES OPERACIONAIS", margin, yPos);
   yPos += 5;
 
   doc.setFont("Times", "normal");
   doc.setFontSize(9);
   yPos = addWrappedText(
-    "6.1. O CONTRATADO está autorizado a registrar fotos e vídeos de sua apresentação para uso profissional e divulgação, salvo se o CONTRATANTE manifestar proibição por escrito.",
+    "6.1. Caso o evento ultrapasse o horário contratado, não será cobrada hora adicional no valor.",
+    margin,
+    yPos,
+    contentWidth,
+    9,
+  );
+  yPos += 3;
+  yPos = addWrappedText(
+    "6.2. O CONTRATANTE se responsabilizará por qualquer dano causado por terceiros aos equipamentos do CONTRATADO.",
     margin,
     yPos,
     contentWidth,
@@ -321,13 +339,91 @@ function generateContractPDF(contractData: ContractData): Buffer {
   checkNewPage(15);
   doc.setFont("Times", "bold");
   doc.setFontSize(10);
-  doc.text("CLÁUSULA 7 - DO FORO", margin, yPos);
+  doc.text("CLÁUSULA 7 - DO USO DE IMAGEM", margin, yPos);
   yPos += 5;
 
   doc.setFont("Times", "normal");
   doc.setFontSize(9);
   yPos = addWrappedText(
-    "7.1. Para dirimir quaisquer dúvidas oriundas deste contrato, as partes elegem o foro da comarca da capital do estado de São Paulo.",
+    "7.1. O CONTRATADO está autorizado a registrar fotos e vídeos de sua apresentação para uso profissional e divulgação, salvo se o CONTRATANTE manifestar proibição por escrito.",
+    margin,
+    yPos,
+    contentWidth,
+    9,
+  );
+  yPos += 5;
+
+  // CLAUSE 8
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 8 - DA CONFIDENCIALIDADE", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  yPos = addWrappedText(
+    "8.1. Informações sensíveis do evento ou do CONTRATANTE não poderão ser divulgadas pelo CONTRATADO sem autorização prévia.",
+    margin,
+    yPos,
+    contentWidth,
+    9,
+  );
+  yPos += 5;
+
+  // CLAUSE 9
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 9 - DA RESCISÃO", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  yPos = addWrappedText(
+    "9.1. O presente contrato poderá ser rescindido por qualquer das partes mediante acordo mútuo, observando as regras de cancelamento deste documento.",
+    margin,
+    yPos,
+    contentWidth,
+    9,
+  );
+  yPos += 5;
+
+  // CLAUSE 10
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 10 - CONDIÇÕES GERAIS", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  const clause10Items = [
+    "10.1. A eventual aceitação ou tolerância, por qualquer das partes, de inexecução de quaisquer cláusulas ou condições do presente, a qualquer tempo, deverá ser interpretada como mera liberalidade, não implicando, portanto, novação, perdão, renúncia, liberação da obrigação assumida, desistência de exigir o cumprimento das disposições aqui contidas ou que o dispositivo violado possa ser considerado como cancelado ou modificado.",
+    "10.2. O presente contrato e quaisquer direitos e obrigações dele decorrente, não poderão ser cedidos ou transferidos, no todo ou em parte, por qualquer Parte a não ser com a prévia e expressa anuência, por escrito, da outra Parte.",
+    "10.3. O presente Contrato representa um acordo integral entre as Partes com relação ao seu objeto e substitui e expressamente revoga quaisquer acordos porventura existentes entre as Partes, expressos ou tácitos, verbais ou escritos.",
+    "10.4. Este Contrato e todas as obrigações e direitos por ele conferidos obriga as Partes e seus respectivos sucessores e cessionários a partir da data de sua assinatura.",
+    "10.5. As partes não serão responsáveis pelo descumprimento de suas respectivas obrigações nos termos deste Contrato em caso de qualquer evento de força maior ou caso fortuito, nos termos do artigo 393 do Código Civil brasileiro.",
+    "10.6. As Partes declaram, para todos os efeitos, que são independentes e autônomas, de forma que o presente Contrato não cria qualquer outra modalidade de vínculo entre ambas, inclusive, sem limitação, mandato, sociedade, associação, parceria, consórcio, joint-venture ou representação comercial.",
+  ];
+  clause10Items.forEach((item) => {
+    checkNewPage(12);
+    yPos = addWrappedText(item, margin, yPos, contentWidth, 9);
+    yPos += 3;
+  });
+  yPos += 2;
+
+  // CLAUSE 11
+  checkNewPage(15);
+  doc.setFont("Times", "bold");
+  doc.setFontSize(10);
+  doc.text("CLÁUSULA 11 - DO FORO", margin, yPos);
+  yPos += 5;
+
+  doc.setFont("Times", "normal");
+  doc.setFontSize(9);
+  yPos = addWrappedText(
+    "11.1. Para dirimir quaisquer dúvidas oriundas deste contrato, as partes elegem o foro da comarca da capital do estado de São Paulo.",
     margin,
     yPos,
     contentWidth,
@@ -483,20 +579,51 @@ function formatDateExtended(date: Date): string {
   return `${day} de ${month} de ${year}`;
 }
 
-// Adicionar data ao arquivo de datas ocupadas
-function addOccupiedDate(date: string) {
+// Adicionar data ao registro de datas ocupadas (Redis ou arquivo local)
+async function addOccupiedDate(date: string) {
+  const hasRedis =
+    !!process.env.UPSTASH_REDIS_REST_URL &&
+    !!process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (hasRedis) {
+    try {
+      const redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL!,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      });
+      const REDIS_KEY = "occupied-dates";
+      const raw = await redis.get(REDIS_KEY);
+      let dates: string[] = [];
+      if (Array.isArray(raw)) {
+        dates = raw as string[];
+      } else if (typeof raw === "string") {
+        try {
+          dates = JSON.parse(raw);
+        } catch {
+          dates = [];
+        }
+      }
+      if (!dates.includes(date)) {
+        dates.push(date);
+      }
+      await redis.set(REDIS_KEY, JSON.stringify(dates));
+      return;
+    } catch (error) {
+      console.error("Erro ao salvar data no Redis:", error);
+      return;
+    }
+  }
+
+  // Fallback local (desenvolvimento)
   try {
-    let data = { dates: [] };
+    let data: { dates: string[] } = { dates: [] };
     if (fs.existsSync(DATA_FILE)) {
       const fileContent = fs.readFileSync(DATA_FILE, "utf-8");
       data = JSON.parse(fileContent);
     }
-
-    // Evitar duplicatas
     if (!data.dates.includes(date)) {
       data.dates.push(date);
     }
-
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
   } catch (error) {
     console.error("Erro ao adicionar data ocupada:", error);
@@ -678,17 +805,28 @@ export async function POST(request: Request) {
     const pdfBuffer = generateContractPDF(data);
     console.log("✅ PDF gerado com sucesso");
 
-    // Enviar emails para cliente e DJ com PDF attachado
-    console.log("📧 Enviando emails...");
-    await sendContractEmails(data, pdfBuffer);
-    console.log("✅ Emails enviados com sucesso");
+    // Marcar data como ocupada ANTES de enviar email (mais crítico)
+    await addOccupiedDate(dateString);
+    console.log("✅ Data marcada como ocupada:", dateString);
 
-    // Adicionar data ao arquivo de datas ocupadas
-    addOccupiedDate(dateString);
+    // Enviar emails — falha não cancela o contrato
+    console.log("📧 Enviando emails...");
+    let emailError: string | null = null;
+    try {
+      await sendContractEmails(data, pdfBuffer);
+      console.log("✅ Emails enviados com sucesso");
+    } catch (err) {
+      emailError = err instanceof Error ? err.message : String(err);
+      console.error(
+        "❌ Erro ao enviar emails (contrato já registrado):",
+        emailError,
+      );
+    }
 
     return NextResponse.json({
       success: true,
       message: "Contrato enviado com sucesso",
+      emailError,
       data: {
         cliente: data.nomeCompleto,
         evento: data.nomeEvento,
