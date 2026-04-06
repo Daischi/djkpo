@@ -66,7 +66,11 @@ export function ContractForm() {
       setIsLoadingDates(true);
       const response = await fetch("/api/occupied-dates");
       const data = await response.json();
-      const dates = data.dates.map((dateStr: string) => new Date(dateStr));
+      const dates = data.dates.map((dateStr: string) => {
+        // Parsear como horário local para evitar bug de timezone (UTC vs UTC-3)
+        const [year, month, day] = dateStr.split("-").map(Number);
+        return new Date(year, month - 1, day);
+      });
       setOccupiedDates(dates);
     } catch (error) {
       console.error("Erro ao buscar datas ocupadas:", error);

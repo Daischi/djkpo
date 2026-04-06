@@ -479,42 +479,34 @@ async function addOccupiedDate(date: string) {
     !!process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (hasRedis) {
-    try {
-      const redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL!,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-      });
-      const REDIS_KEY = "occupied-dates";
-      const raw = await redis.get(REDIS_KEY);
-      let dates: string[] = [];
-      if (Array.isArray(raw)) {
-        dates = raw as string[];
-      } else if (typeof raw === "string") {
-        try {
-          dates = JSON.parse(raw);
-        } catch {
-          dates = [];
-        }
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    });
+    const REDIS_KEY = "occupied-dates";
+    const raw = await redis.get(REDIS_KEY);
+    let dates: string[] = [];
+    if (Array.isArray(raw)) {
+      dates = raw as string[];
+    } else if (typeof raw === "string") {
+      try {
+        dates = JSON.parse(raw);
+      } catch {
+        dates = [];
       }
-      if (!dates.includes(date)) dates.push(date);
-      await redis.set(REDIS_KEY, JSON.stringify(dates));
-    } catch (err) {
-      console.error("Erro ao salvar data no Redis:", err);
     }
+    if (!dates.includes(date)) dates.push(date);
+    await redis.set(REDIS_KEY, JSON.stringify(dates));
     return;
   }
 
   // Fallback local (desenvolvimento)
-  try {
-    let stored: { dates: string[] } = { dates: [] };
-    if (fs.existsSync(DATA_FILE)) {
-      stored = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
-    }
-    if (!stored.dates.includes(date)) stored.dates.push(date);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(stored, null, 2));
-  } catch (err) {
-    console.error("Erro ao salvar data local:", err);
+  let stored: { dates: string[] } = { dates: [] };
+  if (fs.existsSync(DATA_FILE)) {
+    stored = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
   }
+  if (!stored.dates.includes(date)) stored.dates.push(date);
+  fs.writeFileSync(DATA_FILE, JSON.stringify(stored, null, 2));
 }
 
 // ─── Envio de email via Resend (sem bloqueio SMTP no Vercel) ─────────────────
@@ -629,8 +621,14 @@ export async function POST(request: Request) {
     console.log(`PDF gerado: ${pdfBytes.length} bytes`);
 
     // 2. Marcar data como ocupada (antes do email — mais crítico)
-    await addOccupiedDate(dateString);
-    console.log("Data marcada:", dateString);
+    let dateError: string | null = null;
+    try {
+      await addOccupiedDate(dateString);
+      console.log("Data marcada:", dateString);
+    } catch (err) {
+      dateError = err instanceof Error ? err.message : String(err);
+      console.error("Erro ao marcar data:", dateError);
+    }
 
     // 3. Enviar emails (falha não cancela o registro)
     let emailError: string | null = null;
@@ -646,6 +644,7 @@ export async function POST(request: Request) {
       success: true,
       message: "Contrato registrado com sucesso",
       emailError,
+      dateError,
       data: {
         cliente: data.nomeCompleto,
         evento: data.nomeEvento,
