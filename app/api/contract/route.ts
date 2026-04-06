@@ -35,8 +35,18 @@ function formatDateShort(dateString: string): string {
 
 function formatDateExtended(date: Date): string {
   const months = [
-    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+    "janeiro",
+    "fevereiro",
+    "março",
+    "abril",
+    "maio",
+    "junho",
+    "julho",
+    "agosto",
+    "setembro",
+    "outubro",
+    "novembro",
+    "dezembro",
   ];
   return `${date.getDate()} de ${months[date.getMonth()]} de ${date.getFullYear()}`;
 }
@@ -99,7 +109,13 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
     const lines = wrapText(text, font, fontSize, contentWidth - indent);
     for (const line of lines) {
       checkPage(lineHeight + 4);
-      page.drawText(line, { x: margin + indent, y, size: fontSize, font, color: black });
+      page.drawText(line, {
+        x: margin + indent,
+        y,
+        size: fontSize,
+        font,
+        color: black,
+      });
       y -= lineHeight;
     }
     y -= extraSpacing;
@@ -108,7 +124,13 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
   function drawTitle(text: string) {
     checkPage(30);
     y -= 4;
-    page.drawText(text, { x: margin, y, size: 10, font: timesBold, color: black });
+    page.drawText(text, {
+      x: margin,
+      y,
+      size: 10,
+      font: timesBold,
+      color: black,
+    });
     y -= lineHeight + 2;
   }
 
@@ -125,17 +147,35 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
   // ── Cabeçalho ──
   const title = "CONTRATO DE PRESTAÇÃO DE SERVIÇOS";
   const titleW = timesBold.widthOfTextAtSize(title, 16);
-  page.drawText(title, { x: (pageWidth - titleW) / 2, y, size: 16, font: timesBold, color: black });
+  page.drawText(title, {
+    x: (pageWidth - titleW) / 2,
+    y,
+    size: 16,
+    font: timesBold,
+    color: black,
+  });
   y -= 20;
 
   const sub = "DISCOTECAGEM E ILUMINAÇÃO";
   const subW = timesRoman.widthOfTextAtSize(sub, 12);
-  page.drawText(sub, { x: (pageWidth - subW) / 2, y, size: 12, font: timesRoman, color: black });
+  page.drawText(sub, {
+    x: (pageWidth - subW) / 2,
+    y,
+    size: 12,
+    font: timesRoman,
+    color: black,
+  });
   y -= 10;
   drawLine();
 
   // ── Introdução ──
-  drawText("Pelo presente instrumento particular, as partes abaixo identificadas:", timesRoman, 10, 0, 4);
+  drawText(
+    "Pelo presente instrumento particular, as partes abaixo identificadas:",
+    timesRoman,
+    10,
+    0,
+    4,
+  );
 
   // ── CONTRATANTE ──
   drawText("CONTRATANTE:", timesBold, 10, 0, 2);
@@ -151,11 +191,23 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
   drawText("Endereço: Rua Juaguaré, 216", timesRoman, 10, 8, 0);
   drawText("Chave PIX: lojaaloehas@gmail.com", timesRoman, 10, 8, 8);
 
-  drawText("Têm entre si justo e contratado o que segue:", timesRoman, 10, 0, 8);
+  drawText(
+    "Têm entre si justo e contratado o que segue:",
+    timesRoman,
+    10,
+    0,
+    8,
+  );
 
   // ── Cláusula 1 ──
   drawTitle("CLÁUSULA 1 – DO OBJETO");
-  drawText("1.1. O presente contrato tem como objeto a prestação de serviços de discotecagem (Deejay) pelo CONTRATADO no evento descrito a seguir:", timesRoman, 9, 0, 3);
+  drawText(
+    "1.1. O presente contrato tem como objeto a prestação de serviços de discotecagem (Deejay) pelo CONTRATADO no evento descrito a seguir:",
+    timesRoman,
+    9,
+    0,
+    3,
+  );
   const details = [
     `Nome do evento: ${data.nomeEvento}`,
     `Tipo do evento: ${data.tipoEvento}`,
@@ -175,7 +227,9 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
     "Levar seus equipamentos quando solicitado, ou utilizar estrutura fornecida pelo CONTRATANTE conforme prévio e expresso acordo;",
     "Manter postura profissional durante toda a execução do serviço.",
   ];
-  c2.forEach((item, i) => drawText(`${String.fromCharCode(97 + i)}) ${item}`, timesRoman, 9, 10, 0));
+  c2.forEach((item, i) =>
+    drawText(`${String.fromCharCode(97 + i)}) ${item}`, timesRoman, 9, 10, 0),
+  );
   y -= 4;
 
   // ── Cláusula 3 ──
@@ -188,36 +242,98 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
     "Efetuar o pagamento nas condições e prazos acordados;",
     "Se responsabilizar por qualquer dano causado por terceiros aos equipamentos do CONTRATADO.",
   ];
-  c3.forEach((item, i) => drawText(`${String.fromCharCode(97 + i)}) ${item}`, timesRoman, 9, 10, 0));
+  c3.forEach((item, i) =>
+    drawText(`${String.fromCharCode(97 + i)}) ${item}`, timesRoman, 9, 10, 0),
+  );
   y -= 4;
 
   // ── Cláusula 4 ──
   drawTitle("CLÁUSULA 4 – DO VALOR E FORMA DE PAGAMENTO");
-  drawText("4.1. Pelo serviço prestado, o CONTRATANTE pagará ao CONTRATADO o valor total de R$ 4.000,00 (Quatro mil reais) de maneira antecipada e integralmente até a véspera do evento, via PIX na chave: lojaaloehas@gmail.com.", timesRoman, 9, 0, 4);
+  drawText(
+    "4.1. Pelo serviço prestado, o CONTRATANTE pagará ao CONTRATADO o valor total de R$ 4.000,00 (Quatro mil reais) de maneira antecipada e integralmente até a véspera do evento, via PIX na chave: lojaaloehas@gmail.com.",
+    timesRoman,
+    9,
+    0,
+    4,
+  );
 
   // ── Cláusula 5 ──
   drawTitle("CLÁUSULA 5 – DO CANCELAMENTO");
-  drawText("5.1. Em caso de cancelamento por parte do CONTRATANTE:", timesRoman, 9, 0, 2);
-  drawText("• Menos de 7 dias do evento: não há devolução do valor pago;", timesRoman, 9, 10, 0);
-  drawText("• Em caso de força maior comprovada, as partes poderão remarcar a data sem multa.", timesRoman, 9, 10, 2);
-  drawText("5.2. Em caso de cancelamento pelo CONTRATADO, todos os valores pagos deverão ser devolvidos integralmente, além do compromisso de indicar substituto de mesmo nível profissional.", timesRoman, 9, 0, 4);
+  drawText(
+    "5.1. Em caso de cancelamento por parte do CONTRATANTE:",
+    timesRoman,
+    9,
+    0,
+    2,
+  );
+  drawText(
+    "• Menos de 7 dias do evento: não há devolução do valor pago;",
+    timesRoman,
+    9,
+    10,
+    0,
+  );
+  drawText(
+    "• Em caso de força maior comprovada, as partes poderão remarcar a data sem multa.",
+    timesRoman,
+    9,
+    10,
+    2,
+  );
+  drawText(
+    "5.2. Em caso de cancelamento pelo CONTRATADO, todos os valores pagos deverão ser devolvidos integralmente, além do compromisso de indicar substituto de mesmo nível profissional.",
+    timesRoman,
+    9,
+    0,
+    4,
+  );
 
   // ── Cláusula 6 ──
   drawTitle("CLÁUSULA 6 – DAS CONDIÇÕES OPERACIONAIS");
-  drawText("6.1. Caso o evento ultrapasse o horário contratado, não será cobrada hora adicional no valor.", timesRoman, 9, 0, 2);
-  drawText("6.2. O CONTRATANTE se responsabilizará por qualquer dano causado por terceiros aos equipamentos do CONTRATADO.", timesRoman, 9, 0, 4);
+  drawText(
+    "6.1. Caso o evento ultrapasse o horário contratado, não será cobrada hora adicional no valor.",
+    timesRoman,
+    9,
+    0,
+    2,
+  );
+  drawText(
+    "6.2. O CONTRATANTE se responsabilizará por qualquer dano causado por terceiros aos equipamentos do CONTRATADO.",
+    timesRoman,
+    9,
+    0,
+    4,
+  );
 
   // ── Cláusula 7 ──
   drawTitle("CLÁUSULA 7 – DO USO DE IMAGEM");
-  drawText("7.1. O CONTRATADO está autorizado a registrar fotos e vídeos de sua apresentação para uso profissional e divulgação, salvo se o CONTRATANTE manifestar proibição por escrito.", timesRoman, 9, 0, 4);
+  drawText(
+    "7.1. O CONTRATADO está autorizado a registrar fotos e vídeos de sua apresentação para uso profissional e divulgação, salvo se o CONTRATANTE manifestar proibição por escrito.",
+    timesRoman,
+    9,
+    0,
+    4,
+  );
 
   // ── Cláusula 8 ──
   drawTitle("CLÁUSULA 8 – DA CONFIDENCIALIDADE");
-  drawText("8.1. Informações sensíveis do evento ou do CONTRATANTE não poderão ser divulgadas pelo CONTRATADO sem autorização prévia.", timesRoman, 9, 0, 4);
+  drawText(
+    "8.1. Informações sensíveis do evento ou do CONTRATANTE não poderão ser divulgadas pelo CONTRATADO sem autorização prévia.",
+    timesRoman,
+    9,
+    0,
+    4,
+  );
 
   // ── Cláusula 9 ──
   drawTitle("CLÁUSULA 9 – DA RESCISÃO");
-  drawText("9.1. O presente contrato poderá ser rescindido por qualquer das partes mediante acordo mútuo, observando as regras de cancelamento deste documento.", timesRoman, 9, 0, 4);
+  drawText(
+    "9.1. O presente contrato poderá ser rescindido por qualquer das partes mediante acordo mútuo, observando as regras de cancelamento deste documento.",
+    timesRoman,
+    9,
+    0,
+    4,
+  );
 
   // ── Cláusula 10 ──
   drawTitle("CLÁUSULA 10 – CONDIÇÕES GERAIS");
@@ -234,12 +350,30 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
 
   // ── Cláusula 11 ──
   drawTitle("CLÁUSULA 11 – DO FORO");
-  drawText("11.1. Para dirimir quaisquer dúvidas oriundas deste contrato, as partes elegem o foro da comarca da capital do estado de São Paulo.", timesRoman, 9, 0, 8);
+  drawText(
+    "11.1. Para dirimir quaisquer dúvidas oriundas deste contrato, as partes elegem o foro da comarca da capital do estado de São Paulo.",
+    timesRoman,
+    9,
+    0,
+    8,
+  );
 
   // ── Fechamento ──
   checkPage(80);
-  drawText("E, por estarem de pleno acordo, as partes assinam o presente contrato em duas vias de igual teor.", timesBold, 10, 0, 6);
-  drawText(`São Paulo, ${formatDateExtended(new Date())}`, timesBold, 10, 0, 24);
+  drawText(
+    "E, por estarem de pleno acordo, as partes assinam o presente contrato em duas vias de igual teor.",
+    timesBold,
+    10,
+    0,
+    6,
+  );
+  drawText(
+    `São Paulo, ${formatDateExtended(new Date())}`,
+    timesBold,
+    10,
+    0,
+    24,
+  );
 
   // ── Assinaturas ──
   checkPage(70);
@@ -278,7 +412,10 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
     color: black,
   });
   page.drawText(data.nomeCompleto, {
-    x: margin + halfW / 2 - timesRoman.widthOfTextAtSize(data.nomeCompleto, 8) / 2,
+    x:
+      margin +
+      halfW / 2 -
+      timesRoman.widthOfTextAtSize(data.nomeCompleto, 8) / 2,
     y: y - 62,
     size: 8,
     font: timesRoman,
@@ -288,7 +425,11 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
   // DJ KPO lado direito
   const djLabel = "DJ KPO";
   page.drawText(djLabel, {
-    x: margin + halfW + 20 + (halfW - timesItalic.widthOfTextAtSize(djLabel, 18)) / 2,
+    x:
+      margin +
+      halfW +
+      20 +
+      (halfW - timesItalic.widthOfTextAtSize(djLabel, 18)) / 2,
     y: y - 20,
     size: 18,
     font: timesItalic,
@@ -303,14 +444,24 @@ async function generateContractPDF(data: ContractData): Promise<Uint8Array> {
     color: black,
   });
   page.drawText("CONTRATADO", {
-    x: margin + halfW + 20 + halfW / 2 - timesBold.widthOfTextAtSize("CONTRATADO", 9) / 2,
+    x:
+      margin +
+      halfW +
+      20 +
+      halfW / 2 -
+      timesBold.widthOfTextAtSize("CONTRATADO", 9) / 2,
     y: y - 52,
     size: 9,
     font: timesBold,
     color: black,
   });
   page.drawText("Leonardo Capovilla - DJ-Kp0", {
-    x: margin + halfW + 20 + halfW / 2 - timesRoman.widthOfTextAtSize("Leonardo Capovilla - DJ-Kp0", 8) / 2,
+    x:
+      margin +
+      halfW +
+      20 +
+      halfW / 2 -
+      timesRoman.widthOfTextAtSize("Leonardo Capovilla - DJ-Kp0", 8) / 2,
     y: y - 62,
     size: 8,
     font: timesRoman,
@@ -339,7 +490,11 @@ async function addOccupiedDate(date: string) {
       if (Array.isArray(raw)) {
         dates = raw as string[];
       } else if (typeof raw === "string") {
-        try { dates = JSON.parse(raw); } catch { dates = []; }
+        try {
+          dates = JSON.parse(raw);
+        } catch {
+          dates = [];
+        }
       }
       if (!dates.includes(date)) dates.push(date);
       await redis.set(REDIS_KEY, JSON.stringify(dates));
@@ -436,12 +591,23 @@ export async function POST(request: Request) {
 
     // Validação
     const required = [
-      "nomeCompleto", "cpf", "email", "nomeEvento", "tipoEvento",
-      "localEvento", "dataEvento", "horarioInicio", "horarioTermino", "signature",
+      "nomeCompleto",
+      "cpf",
+      "email",
+      "nomeEvento",
+      "tipoEvento",
+      "localEvento",
+      "dataEvento",
+      "horarioInicio",
+      "horarioTermino",
+      "signature",
     ] as const;
     for (const field of required) {
       if (!data[field]) {
-        return NextResponse.json({ message: `Campo obrigatório ausente: ${field}` }, { status: 400 });
+        return NextResponse.json(
+          { message: `Campo obrigatório ausente: ${field}` },
+          { status: 400 },
+        );
       }
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
@@ -454,7 +620,9 @@ export async function POST(request: Request) {
     const dateString = data.dataEvento.split("T")[0];
     const formattedDate = formatDateShort(data.dataEvento);
 
-    console.log(`=== NOVO CONTRATO | ${data.nomeCompleto} | ${data.nomeEvento} | ${formattedDate} ===`);
+    console.log(
+      `=== NOVO CONTRATO | ${data.nomeCompleto} | ${data.nomeEvento} | ${formattedDate} ===`,
+    );
 
     // 1. Gerar PDF
     const pdfBytes = await generateContractPDF(data);
@@ -478,11 +646,18 @@ export async function POST(request: Request) {
       success: true,
       message: "Contrato registrado com sucesso",
       emailError,
-      data: { cliente: data.nomeCompleto, evento: data.nomeEvento, data: formattedDate },
+      data: {
+        cliente: data.nomeCompleto,
+        evento: data.nomeEvento,
+        data: formattedDate,
+      },
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("Erro ao processar contrato:", message);
-    return NextResponse.json({ message: `Erro interno: ${message}` }, { status: 500 });
+    return NextResponse.json(
+      { message: `Erro interno: ${message}` },
+      { status: 500 },
+    );
   }
 }
