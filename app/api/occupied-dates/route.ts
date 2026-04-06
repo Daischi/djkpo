@@ -1,59 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Redis } from "@upstash/redis";
 import fs from "fs";
 import path from "path";
 
 const REDIS_KEY = "occupied-dates";
 const DATA_FILE = path.join(process.cwd(), "public", "occupied-dates.json");
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
-// --- Upstash Redis (produção) ---
-async function getRedisClient() {
-  const { Redis } = await import("@upstash/redis");
+const hasRedis =
+  !!process.env.UPSTASH_REDIS_REST_URL &&
+  !!process.env.UPSTASH_REDIS_REST_TOKEN;
+
+function getRedis() {
   return new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL!,
     token: process.env.UPSTASH_REDIS_REST_TOKEN!,
   });
 }
 
-async function getOccupiedDatesRedis(): Promise<string[]> {
-  const redis = await getRedisClient();
-  const dates = await redis.get<string[]>(REDIS_KEY);
-  return dates || [];
-}
-
-async function saveOccupiedDatesRedis(dates: string[]): Promise<void> {
-  const redis = await getRedisClient();
-  await redis.set(REDIS_KEY, dates);
-}
-
 // --- Arquivo local (desenvolvimento) ---
-function ensureDataFile() {
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify({ dates: [] }, null, 2));
-  }
-}
-
 function getOccupiedDatesLocal(): string[] {
-  ensureDataFile();
+  if (!fs.existsSync(DATA_FILE)) return [];
   const data = fs.readFileSync(DATA_FILE, "utf-8");
-  const parsed = JSON.parse(data);
-  return parsed.dates || [];
+  return JSON.parse(data).dates || [];
 }
 
 function saveOccupiedDatesLocal(dates: string[]) {
-  ensureDataFile();
   fs.writeFileSync(DATA_FILE, JSON.stringify({ dates }, null, 2));
 }
 
 export async function GET() {
   try {
-    const dates = IS_PRODUCTION
-      ? await getOccupiedDatesRedis()
-      : getOccupiedDatesLocal();
-    return NextResponse.json({ dates });
+    if (hasRedis) {
+      const redis = getRedis();
+      const raw = await redis.get(REDIS_KEY);
+      let dates: string[] = [];
+      if (Array.isArray(raw)) {
+        dates = raw as string[];
+      } else if (typeof raw === "string") {
+        dates = JSON.parse(raw);
+      }
+      return NextResponse.json({ dates });
+    }
+
+    return NextResponse.json({ dates: getOccupiedDatesLocal() });
   } catch (error) {
-    console.error("Erro ao ler datas:", error);
-    return NextResponse.json({ dates: [] });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Erro ao ler datas:", message);
+    return NextResponse.json({ dates: [], error: message }, { status: 500 });
   }
 }
 
@@ -69,18 +62,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (IS_PRODUCTION) {
-      await saveOccupiedDatesRedis(dates);
+    if (hasRedis) {
+      const redis = getRedis();
+      await redis.set(REDIS_KEY, JSON.stringify(dates));
     } else {
       saveOccupiedDatesLocal(dates);
     }
 
     return NextResponse.json({ success: true, dates });
   } catch (error) {
-    console.error("Erro ao salvar datas:", error);
-    return NextResponse.json(
-      { error: "Erro ao salvar datas" },
-      { status: 500 },
-    );
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Erro ao salvar datas:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
