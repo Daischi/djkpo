@@ -68,7 +68,7 @@ export function ContactSection() {
 
             <div className="space-y-6">
               <a
-                href="mailto:contato@djkpo.com"
+                href="mailto:Deejaykpo@gmail.com"
                 className="flex items-center gap-4 p-4 bg-card/50 border border-border/50 rounded-lg hover:border-primary/50 transition-all group"
               >
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
