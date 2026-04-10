@@ -3,6 +3,51 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+const SERVICE_PRICING: Record<
+  string,
+  { basePrice: number; includedHours: number; hourlyOnly?: boolean }
+> = {
+  Casamento: { basePrice: 4000, includedHours: 6 },
+  Aniversário: { basePrice: 1000, includedHours: 4 },
+  "Evento Corporativo": { basePrice: 4000, includedHours: 4 },
+  Festa: { basePrice: 2000, includedHours: 4 },
+  Rave: { basePrice: 3000, includedHours: 6 },
+  Festival: { basePrice: 2000, includedHours: 4 },
+  Formatura: { basePrice: 2000, includedHours: 5 },
+};
+
+const ADDITIONAL_HOUR_PRICE = 500;
+
+function calcEventHours(inicio: string, termino: string): number {
+  if (!inicio || !termino) return 0;
+  const [h1, m1] = inicio.split(":").map(Number);
+  const [h2, m2] = termino.split(":").map(Number);
+  let minutes = h2 * 60 + m2 - (h1 * 60 + m1);
+  if (minutes <= 0) minutes += 24 * 60;
+  return minutes / 60;
+}
+
+function formatBRL(value: number): string {
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function calcPricing(
+  tipoEvento: string,
+  horarioInicio: string,
+  horarioTermino: string,
+) {
+  const config = SERVICE_PRICING[tipoEvento];
+  if (!config) return null;
+  const totalHours = calcEventHours(horarioInicio, horarioTermino);
+  const additionalHours = Math.max(
+    0,
+    Math.ceil(totalHours - config.includedHours),
+  );
+  const additionalCost = additionalHours * ADDITIONAL_HOUR_PRICE;
+  const total = config.basePrice + additionalCost;
+  return { ...config, totalHours, additionalHours, additionalCost, total };
+}
+
 interface ContractData {
   nomeCompleto: string;
   cpf: string;
@@ -32,6 +77,11 @@ export function ContractPreview({ data, signature }: ContractPreviewProps) {
   };
 
   const today = new Date();
+  const pricing = calcPricing(
+    data.tipoEvento,
+    data.horarioInicio,
+    data.horarioTermino,
+  );
 
   return (
     <div className="bg-white text-black p-8 md:p-12 rounded-lg shadow-lg max-w-3xl mx-auto font-serif">
@@ -177,13 +227,68 @@ export function ContractPreview({ data, signature }: ContractPreviewProps) {
           <h3 className="font-bold mb-2">
             CLÁUSULA 4 – DO VALOR E FORMA DE PAGAMENTO
           </h3>
-          <p>
-            4.1. Pelo serviço prestado, o CONTRATANTE pagará ao CONTRATADO o
-            valor total de <strong>R$ 4.000,00 (Quatro mil reais)</strong> que
-            será efetuado de maneira antecipada e integralmente até a véspera do
-            evento, na forma de pix, na chave pix:{" "}
-            <strong>lojaaloehas@gmail.com</strong>.
-          </p>
+          {data.tipoEvento === "Outro" ? (
+            <p>
+              4.1. O valor do serviço prestado será{" "}
+              <strong>negociado diretamente entre as partes</strong> antes da
+              realização do evento, e o pagamento deverá ser efetuado de maneira
+              antecipada e integralmente até a véspera do evento, na forma de
+              pix, na chave pix: <strong>lojaaloehas@gmail.com</strong>.
+            </p>
+          ) : pricing ? (
+            <>
+              <p className="mb-2">
+                4.1. Pelo serviço prestado, o CONTRATANTE pagará ao CONTRATADO o
+                valor conforme tabela abaixo:
+              </p>
+              <table className="w-full text-sm border border-gray-300 mb-3">
+                <tbody>
+                  {!pricing.hourlyOnly && (
+                    <tr className="border-b border-gray-200">
+                      <td className="py-1 px-3 font-semibold">
+                        Serviço base ({data.tipoEvento} —{" "}
+                        {pricing.includedHours}h incluídas)
+                      </td>
+                      <td className="py-1 px-3 text-right">
+                        {formatBRL(pricing.basePrice)}
+                      </td>
+                    </tr>
+                  )}
+                  {pricing.additionalHours > 0 && (
+                    <tr className="border-b border-gray-200">
+                      <td className="py-1 px-3">
+                        {pricing.hourlyOnly
+                          ? `${pricing.additionalHours}h × ${formatBRL(ADDITIONAL_HOUR_PRICE)}/h`
+                          : `Horas adicionais (${pricing.additionalHours}h × ${formatBRL(ADDITIONAL_HOUR_PRICE)})`}
+                      </td>
+                      <td className="py-1 px-3 text-right">
+                        {formatBRL(pricing.additionalCost)}
+                      </td>
+                    </tr>
+                  )}
+                  <tr className="bg-gray-100 font-bold">
+                    <td className="py-2 px-3">TOTAL A PAGAR</td>
+                    <td className="py-2 px-3 text-right text-base">
+                      {formatBRL(pricing.total)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p>
+                O pagamento deverá ser efetuado de maneira antecipada e
+                integralmente até a véspera do evento, na forma de pix, na chave
+                pix: <strong>lojaaloehas@gmail.com</strong>.
+              </p>
+            </>
+          ) : (
+            <p>
+              4.1. Pelo serviço prestado, o CONTRATANTE pagará ao CONTRATADO o
+              valor total a ser definido conforme tipo e duração do evento, que
+              deverá ser efetuado de maneira antecipada e integralmente até a
+              véspera do evento, na forma de pix, na chave pix:{" "}
+              <strong>lojaaloehas@gmail.com</strong>.
+            </p>
+          )}
         </div>
 
         {/* Clause 5 */}
@@ -215,8 +320,10 @@ export function ContractPreview({ data, signature }: ContractPreviewProps) {
             CLÁUSULA 6 – DAS CONDIÇÕES OPERACIONAIS
           </h3>
           <p className="mb-1">
-            6.1. Caso o evento ultrapasse o horário contratado, não será cobrada
-            hora adicional no valor.
+            6.1. Caso o evento ultrapasse o horário contratado, será cobrado o
+            valor de{" "}
+            <strong>R$ 500,00 (quinhentos reais) por hora adicional</strong>, a
+            ser pago ao CONTRATADO antes do início do período excedente.
           </p>
           <p>
             6.2. Cláusula de obrigações do CONTRATANTE: se responsabilizará por

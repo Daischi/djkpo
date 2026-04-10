@@ -25,6 +25,51 @@ import { SignaturePad } from "./signature-pad";
 import { ContractPreview } from "./contract-preview";
 import { Spinner } from "@/components/ui/spinner";
 
+const SERVICE_PRICING: Record<
+  string,
+  { basePrice: number; includedHours: number; hourlyOnly?: boolean }
+> = {
+  Casamento: { basePrice: 4000, includedHours: 6 },
+  Aniversário: { basePrice: 1000, includedHours: 4 },
+  "Evento Corporativo": { basePrice: 4000, includedHours: 4 },
+  Festa: { basePrice: 2000, includedHours: 4 },
+  Rave: { basePrice: 3000, includedHours: 6 },
+  Festival: { basePrice: 2000, includedHours: 4 },
+  Formatura: { basePrice: 2000, includedHours: 5 },
+};
+
+const ADDITIONAL_HOUR_PRICE = 500;
+
+function calcEventHours(inicio: string, termino: string): number {
+  if (!inicio || !termino) return 0;
+  const [h1, m1] = inicio.split(":").map(Number);
+  const [h2, m2] = termino.split(":").map(Number);
+  let minutes = h2 * 60 + m2 - (h1 * 60 + m1);
+  if (minutes <= 0) minutes += 24 * 60;
+  return minutes / 60;
+}
+
+function formatBRL(value: number): string {
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function calcPricing(
+  tipoEvento: string,
+  horarioInicio: string,
+  horarioTermino: string,
+) {
+  const config = SERVICE_PRICING[tipoEvento];
+  if (!config) return null;
+  const totalHours = calcEventHours(horarioInicio, horarioTermino);
+  const additionalHours = Math.max(
+    0,
+    Math.ceil(totalHours - config.includedHours),
+  );
+  const additionalCost = additionalHours * ADDITIONAL_HOUR_PRICE;
+  const total = config.basePrice + additionalCost;
+  return { ...config, totalHours, additionalHours, additionalCost, total };
+}
+
 const eventTypes = [
   "Festa",
   "Casamento",
@@ -371,6 +416,74 @@ export function ContractForm() {
               </div>
             </div>
           </div>
+
+          {/* Pricing Summary */}
+          {(() => {
+            if (!formData.tipoEvento) return null;
+            if (formData.tipoEvento === "Outro") {
+              return (
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
+                    Resumo do Valor
+                  </h3>
+                  <div className="bg-background border border-border rounded-lg overflow-hidden text-sm">
+                    <div className="flex justify-between items-center px-4 py-3 bg-primary/10 font-bold">
+                      <span className="text-foreground">Valor</span>
+                      <span className="text-primary text-lg">A combinar</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    O valor será negociado diretamente entre as partes.
+                  </p>
+                </div>
+              );
+            }
+            const pricing = calcPricing(
+              formData.tipoEvento,
+              formData.horarioInicio,
+              formData.horarioTermino,
+            );
+            if (!pricing) return null;
+            return (
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
+                  Resumo do Valor
+                </h3>
+                <div className="bg-background border border-border rounded-lg overflow-hidden text-sm">
+                  {!pricing.hourlyOnly && (
+                    <div className="flex justify-between items-center px-4 py-2 border-b border-border">
+                      <span className="text-muted-foreground">
+                        {formData.tipoEvento} — {pricing.includedHours}h
+                        incluídas
+                      </span>
+                      <span>{formatBRL(pricing.basePrice)}</span>
+                    </div>
+                  )}
+                  {pricing.additionalHours > 0 && (
+                    <div className="flex justify-between items-center px-4 py-2 border-b border-border">
+                      <span className="text-muted-foreground">
+                        {pricing.hourlyOnly
+                          ? `${pricing.additionalHours}h × ${formatBRL(ADDITIONAL_HOUR_PRICE)}/h`
+                          : `Horas adicionais (${pricing.additionalHours}h × ${formatBRL(ADDITIONAL_HOUR_PRICE)})`}
+                      </span>
+                      <span>{formatBRL(pricing.additionalCost)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center px-4 py-3 bg-primary/10 font-bold">
+                    <span className="text-foreground">Total a Pagar</span>
+                    <span className="text-primary text-lg">
+                      {formatBRL(pricing.total)}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {pricing.hourlyOnly
+                    ? `${formatBRL(ADDITIONAL_HOUR_PRICE)}/h · Pagamento antecipado via Pix`
+                    : `Hora adicional: ${formatBRL(ADDITIONAL_HOUR_PRICE)}/h · Pagamento antecipado via Pix`}
+                </p>
+              </div>
+            );
+          })()}
 
           {/* Signature */}
           <div className="space-y-4">

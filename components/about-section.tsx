@@ -82,19 +82,18 @@ export function AboutSection() {
             <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
               Com mais de uma década dedicada à música eletrônica,{" "}
               <strong className="text-foreground">DJ KPO</strong> se consolidou
-              como uma das referências do cenário{" "}
-              <strong className="text-primary">Techno Underground</strong>{" "}
-              brasileiro.
+              como uma das referências do cenário brasileiro.
             </p>
 
             <p className="text-muted-foreground mb-8 leading-relaxed">
               Especialista em{" "}
-              <strong className="text-foreground">Hard Techno</strong>,{" "}
-              <strong className="text-foreground">Industrial</strong> e
-              <strong className="text-foreground"> Warehouse Techno</strong>,
-              suas performances são conhecidas pela energia intensa e pela
-              capacidade de criar atmosferas únicas que transportam o público
-              para uma experiência sonora imersiva.
+              <strong className="text-foreground">open format</strong>, com foco
+              em <strong className="text-primary">Tech House</strong>,{" "}
+              <strong className="text-primary">Afro House</strong> e{" "}
+              <strong className="text-primary">Tech House underground</strong>,
+              suas performances são conhecidas pela versatilidade, energia e
+              pela criação de mashups que tornam cada set único, proporcionando
+              uma experiência sonora envolvente ao público.
             </p>
 
             {/* Stats Grid */}

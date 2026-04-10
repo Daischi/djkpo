@@ -550,7 +550,7 @@ async function sendContractEmails(data: ContractData, pdfBytes: Uint8Array) {
   // Email para o DJ
   await resend.emails.send({
     from: "DJ KPO Site <no-reply@djkpo.com>",
-    to: "guilhermepoppilm@gmail.com",
+    to: "Deejaykpo@gmail.com",
     subject: `[NOVO CONTRATO] ${data.nomeEvento} – ${data.nomeCompleto}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
